@@ -4,24 +4,29 @@ module if_id_reg (
     input  logic        rst_n,
     input  logic        stall,
     input  logic        flush,
+    input  logic        if_valid,
     input  logic [31:0] if_pc,
     input  logic [31:0] if_pc_plus_4,
     input  logic [31:0] if_instr,
     
+    output logic        id_valid,
     output logic [31:0] id_pc,
     output logic [31:0] id_pc_plus_4,
     output logic [31:0] id_instr
 );
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
+            id_valid     <= 1'b0;
             id_pc        <= 32'b0;
             id_pc_plus_4 <= 32'b0;
             id_instr     <= 32'b0;
         end else if (flush) begin
+            id_valid     <= 1'b0; // Squash valid bit to create a bubble
             id_pc        <= 32'b0;
             id_pc_plus_4 <= 32'b0;
             id_instr     <= 32'b0;
         end else if (!stall) begin
+            id_valid     <= if_valid;
             id_pc        <= if_pc;
             id_pc_plus_4 <= if_pc_plus_4;
             id_instr     <= if_instr;
@@ -35,6 +40,7 @@ module id_ex_reg (
     input  logic        rst_n,
     input  logic        flush,
     
+    input  logic        id_valid,
     input  logic [31:0] id_pc,
     input  logic [31:0] id_pc_plus_4,
     input  logic [31:0] id_rs1_data,
@@ -52,6 +58,7 @@ module id_ex_reg (
     input  logic [1:0]  id_result_src,
     input  logic [3:0]  id_alu_ctrl,
 
+    output logic        ex_valid,
     output logic [31:0] ex_pc,
     output logic [31:0] ex_pc_plus_4,
     output logic [31:0] ex_rs1_data,
@@ -71,6 +78,7 @@ module id_ex_reg (
 );
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
+            ex_valid      <= 1'b0;
             ex_pc         <= 32'b0;
             ex_pc_plus_4  <= 32'b0;
             ex_rs1_data   <= 32'b0;
@@ -87,6 +95,7 @@ module id_ex_reg (
             ex_result_src <= 2'b0;
             ex_alu_ctrl   <= 4'b0;
         end else if (flush) begin
+            ex_valid      <= 1'b0; // Squash valid bit
             ex_pc         <= 32'b0;
             ex_pc_plus_4  <= 32'b0;
             ex_rs1_data   <= 32'b0;
@@ -103,6 +112,7 @@ module id_ex_reg (
             ex_result_src <= 2'b0;
             ex_alu_ctrl   <= 4'b0;
         end else begin
+            ex_valid      <= id_valid;
             ex_pc         <= id_pc;
             ex_pc_plus_4  <= id_pc_plus_4;
             ex_rs1_data   <= id_rs1_data;
@@ -127,6 +137,7 @@ module ex_mem_reg (
     input  logic        clk,
     input  logic        rst_n,
     
+    input  logic        ex_valid,
     input  logic [31:0] ex_pc_plus_4,
     input  logic [31:0] ex_alu_result,
     input  logic [31:0] ex_mem_write_data,
@@ -137,6 +148,7 @@ module ex_mem_reg (
     input  logic        ex_mem_read,
     input  logic [1:0]  ex_result_src,
 
+    output logic        mem_valid,
     output logic [31:0] mem_pc_plus_4,
     output logic [31:0] mem_alu_result,
     output logic [31:0] mem_write_data,
@@ -149,6 +161,7 @@ module ex_mem_reg (
 );
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
+            mem_valid      <= 1'b0;
             mem_pc_plus_4  <= 32'b0;
             mem_alu_result <= 32'b0;
             mem_write_data <= 32'b0;
@@ -158,6 +171,7 @@ module ex_mem_reg (
             mem_mem_read   <= 1'b0;
             mem_result_src <= 2'b0;
         end else begin
+            mem_valid      <= ex_valid;
             mem_pc_plus_4  <= ex_pc_plus_4;
             mem_alu_result <= ex_alu_result;
             mem_write_data <= ex_mem_write_data;
@@ -175,6 +189,7 @@ module mem_wb_reg (
     input  logic        clk,
     input  logic        rst_n,
     
+    input  logic        mem_valid,
     input  logic [31:0] mem_pc_plus_4,
     input  logic [31:0] mem_alu_result,
     input  logic [31:0] mem_read_data,
@@ -183,6 +198,7 @@ module mem_wb_reg (
     input  logic        mem_reg_write,
     input  logic [1:0]  mem_result_src,
 
+    output logic        wb_valid,
     output logic [31:0] wb_pc_plus_4,
     output logic [31:0] wb_alu_result,
     output logic [31:0] wb_read_data,
@@ -193,6 +209,7 @@ module mem_wb_reg (
 );
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
+            wb_valid      <= 1'b0;
             wb_pc_plus_4  <= 32'b0;
             wb_alu_result <= 32'b0;
             wb_read_data  <= 32'b0;
@@ -200,6 +217,7 @@ module mem_wb_reg (
             wb_reg_write  <= 1'b0;
             wb_result_src <= 2'b0;
         end else begin
+            wb_valid      <= mem_valid;
             wb_pc_plus_4  <= mem_pc_plus_4;
             wb_alu_result <= mem_alu_result;
             wb_read_data  <= mem_read_data;

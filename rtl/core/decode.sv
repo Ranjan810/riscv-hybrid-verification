@@ -37,30 +37,53 @@ module decode (
         imm        = 32'b0;
 
         case (opcode)
-            7'b0110011: begin // R-type
+            7'b0110011: begin // R-type (Arith/Logical/Shift)
                 reg_write = 1'b1;
-                if (funct3 == 3'b000 && funct7 == 7'b0100000) begin
-                    alu_ctrl = 4'b0001; // SUB
-                end else if (funct3 == 3'b111) begin
-                    alu_ctrl = 4'b0010; // AND
-                end else if (funct3 == 3'b110) begin
-                    alu_ctrl = 4'b0011; // OR
-                end else begin
-                    alu_ctrl = 4'b0000; // ADD
-                end
+                if (funct7 == 7'b0100000 && funct3 == 3'b000) alu_ctrl = 4'b0001; // SUB
+                else if (funct3 == 3'b000) alu_ctrl = 4'b0000; // ADD
+                else if (funct3 == 3'b100) alu_ctrl = 4'b0100; // XOR
+                else if (funct3 == 3'b010) alu_ctrl = 4'b0101; // SLT
+                else if (funct3 == 3'b001) alu_ctrl = 4'b0110; // SLL
+                else if (funct3 == 3'b101) alu_ctrl = 4'b0111; // SRL
+                else if (funct3 == 3'b111) alu_ctrl = 4'b0010; // AND
+                else if (funct3 == 3'b110) alu_ctrl = 4'b0011; // OR
             end
             
-            7'b0010011: begin // I-type
+            7'b0010011: begin // I-type (Arith/Logical/Shift)
                 reg_write = 1'b1;
                 alu_src   = 1'b1;
                 imm       = {{20{instr[31]}}, instr[31:20]};
-                if (funct3 == 3'b111) begin
-                    alu_ctrl = 4'b0010; // ANDI
-                end else if (funct3 == 3'b110) begin
-                    alu_ctrl = 4'b0011; // ORI
-                end else begin
-                    alu_ctrl = 4'b0000; // ADDI
-                end
+                if (funct3 == 3'b000) alu_ctrl = 4'b0000;      // ADDI
+                else if (funct3 == 3'b100) alu_ctrl = 4'b0100; // XORI
+                else if (funct3 == 3'b010) alu_ctrl = 4'b0101; // SLTI
+                else if (funct3 == 3'b001) alu_ctrl = 4'b0110; // SLLI
+                else if (funct3 == 3'b101) alu_ctrl = 4'b0111; // SRLI
+                else if (funct3 == 3'b111) alu_ctrl = 4'b0010; // ANDI
+                else if (funct3 == 3'b110) alu_ctrl = 4'b0011; // ORI
+            end
+            
+            7'b1100011: begin // Branch instructions (B-type)
+                branch = 1'b1;
+                imm    = {{20{instr[31]}}, instr[7], instr[30:25], instr[11:8], 1'b0};
+                if (funct3 == 3'b000) alu_ctrl = 4'b1000;      // BEQ
+                else if (funct3 == 3'b001) alu_ctrl = 4'b1001; // BNE
+                else if (funct3 == 3'b100) alu_ctrl = 4'b1010; // BLT
+            end
+
+            7'b1101111: begin // JAL (J-type)
+                reg_write  = 1'b1;
+                branch     = 1'b1;
+                result_src = 2'b10; // Save PC+4 to rd
+                imm        = {{12{instr[31]}}, instr[19:12], instr[20], instr[30:21], 1'b0};
+                alu_ctrl   = 4'b1011; // Unconditional Jump
+            end
+
+            7'b1100111: begin // JALR (I-type)
+                reg_write  = 1'b1;
+                branch     = 1'b1;
+                result_src = 2'b10; // Save PC+4 to rd
+                imm        = {{20{instr[31]}}, instr[31:20]};
+                alu_ctrl   = 4'b1100; // Jump Register (Base + Offset)
             end
             
             7'b0000011: begin // Load
@@ -69,20 +92,14 @@ module decode (
                 mem_read   = 1'b1;
                 result_src = 2'b01;
                 imm        = {{20{instr[31]}}, instr[31:20]};
-                alu_ctrl   = 4'b0000; 
+                alu_ctrl   = 4'b0000; // ADD for address calc
             end
             
             7'b0100011: begin // Store
                 mem_write = 1'b1;
                 alu_src   = 1'b1;
                 imm       = {{20{instr[31]}}, instr[31:25], instr[11:7]};
-                alu_ctrl  = 4'b0000; 
-            end
-            
-            7'b1100011: begin // Branch
-                branch   = 1'b1;
-                imm      = {{20{instr[31]}}, instr[7], instr[30:25], instr[11:8], 1'b0};
-                alu_ctrl = 4'b0001; // SUB to compare
+                alu_ctrl  = 4'b0000; // ADD for address calc
             end
             
             default: ; 
