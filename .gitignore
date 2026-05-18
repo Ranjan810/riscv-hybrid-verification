@@ -1,2 +1,11 @@
+# Verilator build folder
 obj_dir/
+
+# Simulation outputs
 *.vcd
+*.dat
+*.info
+
+# Coverage reports
+coverage_html/
+logs/
