@@ -40,12 +40,15 @@ module tb_core (
     );
 
     
-    bind core hazard_cg u_hazard_cg (
+    bind core hazard_sva u_hazard_sva (
         .clk(clk),
         .rst_n(rst_n),
+        .stall(stall),
+        .flush_mispredict(flush_mispredict),
         .forward_a(forward_a),
         .forward_b(forward_b),
-        .stall(stall),
+        .if_pc(id_pc),           // NEW: Pass the PC state
+        .id_instr(id_instr),     // NEW: Pass the Decode state
         .hazard_h1_ex_ex(hazard_h1_ex_ex),
         .hazard_h2_mem_ex(hazard_h2_mem_ex),
         .hazard_h3_load_use(hazard_h3_load_use),
