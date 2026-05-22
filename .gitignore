@@ -5,6 +5,7 @@ obj_dir/
 *.vcd
 *.dat
 *.info
+*.elf
 
 # Coverage reports
 coverage_html/

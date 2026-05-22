@@ -34,8 +34,10 @@ module fetch (
     assign predict_taken = btb_valid[fetch_idx];
     assign actual_taken  = ex_branch & ex_zero;
     
-    // Misprediction occurs if a branch executes and its actual outcome doesn't match the BTB prediction
-    assign flush_mispredict = ex_branch & (actual_taken != btb_valid[ex_idx]);
+    // Misprediction occurs if:
+    // 1. It IS a branch, and actual outcome doesn't match prediction
+    // 2. It is NOT a branch, but the BTB hallucinated a jump (BTB Aliasing)
+    assign flush_mispredict = (actual_taken != btb_valid[ex_idx]);
 
     always_comb begin
         if (flush_mispredict) begin
@@ -69,6 +71,9 @@ module fetch (
                 if (actual_taken) begin
                     btb_target[ex_idx] <= ex_branch_addr;
                 end
+            end else if (btb_valid[ex_idx]) begin
+                // It wasn't a branch, but BTB had a valid entry here (Aliasing). Clear it!
+                btb_valid[ex_idx] <= 1'b0;
             end
         end
     end
