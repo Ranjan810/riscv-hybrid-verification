@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 module decode (
     input  logic [31:0] instr,
     
@@ -62,12 +63,19 @@ module decode (
                 else if (funct3 == 3'b110) alu_ctrl = 4'b0011; // ORI
             end
             
-            7'b1100011: begin // Branch instructions (B-type)
+            7'b1100011: begin
                 branch = 1'b1;
-                imm    = {{20{instr[31]}}, instr[7], instr[30:25], instr[11:8], 1'b0};
-                if (funct3 == 3'b000) alu_ctrl = 4'b1000;      // BEQ
-                else if (funct3 == 3'b001) alu_ctrl = 4'b1001; // BNE
-                else if (funct3 == 3'b100) alu_ctrl = 4'b1010; // BLT
+
+                imm = {{19{instr[31]}},
+                    instr[31],
+                    instr[7],
+                    instr[30:25],
+                    instr[11:8],
+                    1'b0};
+
+                if (funct3 == 3'b000) alu_ctrl = 4'b1000;
+                else if (funct3 == 3'b001) alu_ctrl = 4'b1001;
+                else if (funct3 == 3'b100) alu_ctrl = 4'b1010;
             end
 
             7'b1101111: begin // JAL (J-type)

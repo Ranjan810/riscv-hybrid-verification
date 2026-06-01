@@ -1,12 +1,93 @@
-# Verilator build folder
+# =====================================
+# Simulation Outputs
+# =====================================
+*.vcd
+*.fst
+*.wlf
+*.vpd
+*.fsdb
+
+waveform.vcd
+
+# =====================================
+# Coverage Files
+# =====================================
+coverage.dat
+coverage.info
+
+coverage_html/
+coverage_report/
+cov_work/
+urgReport/
+
+*.ucdb
+*.cov
+*.coverage
+
+# =====================================
+# Verilator
+# =====================================
 obj_dir/
 
-# Simulation outputs
-*.vcd
-*.dat
-*.info
-*.elf
-
-# Coverage reports
-coverage_html/
+# =====================================
+# Simulation Logs
+# =====================================
 logs/
+
+*.log
+*.jou
+*.pb
+
+# =====================================
+# Vivado
+# =====================================
+.vivado/
+.cache/
+.Xil/
+
+*.str
+*.backup.log
+*.webtalk
+*.jou
+*.sim
+
+# =====================================
+# ModelSim / Questa
+# =====================================
+transcript
+vsim.wlf
+modelsim.ini
+work/
+
+# =====================================
+# Temporary Files
+# =====================================
+*.tmp
+*.temp
+*.bak
+*.swp
+
+# =====================================
+# Python Cache
+# =====================================
+__pycache__/
+*.pyc
+*.pyo
+
+# =====================================
+# OS Files
+# =====================================
+.DS_Store
+Thumbs.db
+
+# =====================================
+# VS Code
+# =====================================
+.vscode/settings.json
+.vscode/*.log
+
+# Generated benchmark binaries
+*.elf
+*.hex
+*_vivado.hex
+*_raw.hex

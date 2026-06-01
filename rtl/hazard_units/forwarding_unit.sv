@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 module forwarding_unit (
     input  logic [4:0] rs1_addr_ex,
     input  logic [4:0] rs2_addr_ex,
@@ -10,6 +11,7 @@ module forwarding_unit (
     output logic [1:0] forward_b
 );
 
+    // Golden logic for forward_a
     always_comb begin
         if (reg_write_mem && (rd_addr_mem != 5'b0) && (rd_addr_mem == rs1_addr_ex)) begin
             forward_a = 2'b10;
@@ -20,6 +22,7 @@ module forwarding_unit (
         end
     end
 
+    // Golden logic for forward_b
     always_comb begin
         if (reg_write_mem && (rd_addr_mem != 5'b0) && (rd_addr_mem == rs2_addr_ex)) begin
             forward_b = 2'b10;

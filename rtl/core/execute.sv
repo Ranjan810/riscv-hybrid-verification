@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 module execute (
     input  logic [31:0] pc,
     input  logic [31:0] reg1_data,

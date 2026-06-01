@@ -1,3 +1,5 @@
+`timescale 1ns / 1ps
+
 module core (
     input  logic        clk,
     input  logic        rst_n,
@@ -37,6 +39,17 @@ module core (
     logic [1:0]  forward_a, forward_b;
     logic        flush_if_id, flush_id_ex;
 
+
+    // Verification-only signals
+    logic is_jal_v;
+    logic is_jalr_v;
+    logic bht_prediction_v;
+    logic branch_taken_v;
+    
+    assign is_jal_v  = (id_instr[6:0] == 7'b1101111); // JAL
+    assign is_jalr_v = (id_instr[6:0] == 7'b1100111); // JALR
+    assign branch_taken_v = ex_branch & ex_zero;
+    
     assign instr_addr  = if_pc;
     assign if_valid    = 1'b1; // Fetch stage is always valid unless flushed in the pipe register
     
@@ -44,11 +57,17 @@ module core (
     assign flush_id_ex = flush_mispredict | stall;
 
     fetch u_fetch (
-        .clk(clk), .rst_n(rst_n), .stall(stall),
-        .ex_branch(ex_branch), .ex_zero(ex_zero), 
-        .ex_pc(ex_pc), .ex_branch_addr(ex_branch_addr),
-        .pc_out(if_pc), .pc_plus_4_out(if_pc_plus_4),
-        .flush_mispredict(flush_mispredict)
+    .clk(clk),
+    .rst_n(rst_n),
+    .stall(stall),
+    .ex_branch(ex_branch),
+    .ex_zero(ex_zero),
+    .ex_pc(ex_pc),
+    .ex_branch_addr(ex_branch_addr),
+    .pc_out(if_pc),
+    .pc_plus_4_out(if_pc_plus_4),
+    .flush_mispredict(flush_mispredict),
+    .predict_taken_out(bht_prediction_v)
     );
 
     if_id_reg u_if_id (
@@ -179,7 +198,7 @@ module core (
     // H4: Branch Instruction Detected
     assign hazard_h4_branch_flush = ex_branch & ex_valid;
     
-    // H5: Misprediction Recovery (Actual Pipeline Flush)
+    // H5: Misprediction Recovery
     assign hazard_h5_mispredict = flush_mispredict;
 
 endmodule

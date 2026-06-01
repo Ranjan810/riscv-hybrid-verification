@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 module regfile (
     input  logic        clk,
     input  logic        reg_write,
@@ -10,12 +11,7 @@ module regfile (
     output logic [31:0] rs2_data
 );
 
-    logic [31:0] registers [31:0];
-
-    // Hardwire x0 to 0
-    initial begin
-        registers[0] = 32'b0;
-    end
+    logic [31:0] registers [31:0] = '{default: 32'b0};
 
     // Synchronous write
     always_ff @(posedge clk) begin

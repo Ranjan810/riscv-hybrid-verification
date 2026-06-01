@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 module fetch (
     input  logic        clk,
     input  logic        rst_n,
@@ -11,7 +12,8 @@ module fetch (
     
     output logic [31:0] pc_out,
     output logic [31:0] pc_plus_4_out,
-    output logic        flush_mispredict  // Tell core to flush pipeline
+    output logic        flush_mispredict,   // Tell core to flush pipeline
+    output logic        predict_taken_out
 );
 
     logic [31:0] pc_reg;
@@ -77,8 +79,23 @@ module fetch (
             end
         end
     end
-
+   /* 
+    always @(posedge clk) begin
+        if (rst_n) begin
+            if (ex_branch) begin
+                $display(
+                    "[BRANCH_UPDATE] PC=%h EX_IDX=%0d ZERO=%0b ACTUAL=%0b TARGET=%h",
+                    ex_pc,
+                    ex_idx,
+                    ex_zero,
+                    actual_taken,
+                    ex_branch_addr
+                );
+            end
+        end
+    end
+    */
     assign pc_out = pc_reg;
     assign pc_plus_4_out = pc_reg + 4;
-    
+    assign predict_taken_out = predict_taken;
 endmodule
