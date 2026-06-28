@@ -1,0 +1,4 @@
+tests/** linguist-generated=true
+*.elf linguist-generated=true
+*.hex linguist-generated=true
+*_vivado.hex linguist-generated=true
