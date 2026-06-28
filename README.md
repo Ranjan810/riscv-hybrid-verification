@@ -81,7 +81,7 @@ The processor implements the classic IF-ID-EX-MEM-WB pipeline with hazard detect
 ### Functional Coverage Progression
 
 <p align="center">
-  <img src="images/coverage_progression.png" width="850">
+  <img src="images/coverage_progression.png" width="900">
 </p>
 
 > *Shows the progression of functional coverage as additional directed benchmarks are introduced. Coverage increases from 49.51% to 76.47%, demonstrating systematic coverage closure through benchmark refinement while achieving complete coverage of all primary hazard-related behaviors.*
